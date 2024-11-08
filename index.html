@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Archive Item</title>
+    <style>
+        /* Container to position the iframe and loader together */
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+        }
+
+        /* Styling for the iframe */
+        #archiveFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Loading image overlay */
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+  
+    <button onclick="goToRandomArchiveItem()">Load Random Archive Item</button>
+    
+    <!-- Container for the iframe and loading image -->
+    <div class="iframe-container">
+        <!-- Loading symbol as an overlay -->
+        <img id="loading" src="src\assets\book.svg" alt="Loading..." />
+        
+        <!-- Placeholder for the iframe -->
+        <iframe id="archiveFrame" onload="hideLoader()"></iframe>
+    </div>
+
+    <script>
+        async function goToRandomArchiveItem() {
+            try {
+                // Show the loading icon
+                document.getElementById('loading').style.display = 'block';
+                
+                // Fetch a list of items from Internet Archive
+                const response = await fetch('https://archive.org/advancedsearch.php?q=mediatype:texts&fl[]=identifier&rows=50&output=json');
+                const data = await response.json();
+                
+                // Check if we have any items
+                if (data.response.docs.length > 0) {
+                    // Pick a random item from the list
+                    const randomIndex = Math.floor(Math.random() * data.response.docs.length);
+                    const randomItem = data.response.docs[randomIndex];
+                    
+                    // Construct the URL
+                    const itemUrl = `https://archive.org/details/${randomItem.identifier}`;
+                    
+                    // Set the iframe's source to the item URL
+                    document.getElementById('archiveFrame').src = itemUrl;
+                } else {
+                    alert('No items found. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error fetching items:', error);
+                alert('There was an error. Please try again later.');
+            }
+        }
+
+        // Hide the loader once the iframe has finished loading
+        function hideLoader() {
+            document.getElementById('loading').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
